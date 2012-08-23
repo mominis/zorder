@@ -1,0 +1,583 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1 plus MathML 2.0//EN" "http://www.w3.org/TR/MathML2/dtd/xhtml-math11-f.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta name="GENERATOR" content="LyX 2.0.2" />
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+<title>Keeping Things in (Z)Order</title>
+
+<!-- Text Class Preamble -->
+<style type="text/css">
+div.toc {
+margin: 2em 0em;
+border-style: solid;
+border-width: 2px 0px;
+padding: 1em 0em;
+}
+div.tochead { font-size: x-large; font-weight: bold; }
+div.lyxtoc-0 {
+margin: 2em 0em 0em 0em;
+font-size: xx-large;
+font-weight: bold;
+}
+div.lyxtoc-1 {
+margin: 1em 0em 0em 0em;
+font-size: x-large;
+font-weight: bold;
+}
+div.lyxtoc-2 {
+margin: 0em 0em 0em 1em;
+font-size: large;
+font-weight: normal;
+}
+div.lyxtoc-3 { margin: 0em 0em 0em 0.5em; font-size: medium; }
+div.lyxtoc-4 { margin: 0em 0em 0em 0.5em; }
+div.lyxtoc-5 { margin: 0em 0em 0em 0.5em; }
+div.lyxtoc-6 { margin: 0em 0em 0em 0.5em; }
+a.tocentry {
+text-decoration: none;
+color: black;
+}
+a.tocentry:visited { color: black; }
+a.tocarrow {
+font-weight: bold;
+text-decoration: none;
+color: #909090;
+}
+a.tocarrow:visited { color: #C0C0C0; }
+</style>
+
+<!-- Preamble Snippets -->
+
+<!-- Layout-provided Styles -->
+<style type='text/css'>
+h1.title {
+font-size: x-large;
+margin-bottom: 1ex;
+text-align: center;
+
+}
+div.author {
+font-size: large;
+margin-top: 1.3ex;
+margin-bottom: 0.7ex;
+text-align: center;
+
+}
+div.abstract {
+font-size: small;
+margin-top: 0.7ex;
+margin-bottom: 0.7ex;
+margin-left: 3ex;
+margin-right: 3ex;
+text-align: left;
+
+}
+div.abstract_label {
+font-weight: bold;
+font-size: large;
+text-align: center;
+
+}
+
+div.abstract {
+margin: 4ex;
+}
+div.abstract_item {
+font-size: small;
+padding-top: 1ex;
+}
+div.abstract_label {
+font-weight: bold;
+}
+div.standard {
+margin-bottom: 2ex;
+}
+h2.section {
+font-weight: bold;
+font-size: x-large;
+margin-top: 1.3ex;
+margin-bottom: 0.7ex;
+text-align: left;
+
+}
+h3.subsection {
+font-weight: bold;
+font-size: large;
+margin-top: 0.9ex;
+margin-bottom: 0.5ex;
+text-align: left;
+
+}
+ul.itemize {
+margin-top: 0.7ex;
+margin-bottom: 0.7ex;
+margin-left: 3ex;
+text-align: left;
+
+}
+h4.subsubsection {
+font-weight: bold;
+font-size: medium;
+margin-top: 0.7ex;
+margin-bottom: 0.4ex;
+text-align: left;
+
+}
+dl.description dt { font-weight: bold; }
+div.plain_layout {
+text-align: left;
+
+}
+span.foot_label {
+vertical-align: super;
+font-size: smaller;
+font-weight: bold;
+text-decoration: underline;
+}
+div.foot {
+display: inline;
+font-size: small;
+font-weight: medium;
+font-family: serif;
+font-variant: normal;
+font-style: normal;
+}
+div.foot_inner { display: none; }
+div.foot:hover div.foot_inner {
+display: block;
+border: 1px double black;
+margin: 0em 1em;
+padding: 1em;
+}
+span.flex_url {
+font-family: monospace;
+}
+div.listings {
+font-family: monospace;
+}
+</style>
+</head>
+<body>
+<h1 class="title"><a id='magicparlabel-3' />
+Keeping Things in (Z)Order</h1>
+<div class="author"><a id='magicparlabel-4' />
+Itay Duvdevani</div>
+
+<div class="abstract"><div class="abstract_label">Abstract</div>
+<div class="abstract_item"><a id='magicparlabel-5' />
+The MoMinis Game Engine renderer and touch handler requires that game objects will be sorted in a back-to-front (or front-to-back) order when textures with translucency and touch-events are in use. To keep this management overhead to a minimum when a large number of objects is to be managed, we developed a method for keeping objects in the correct Z-order at constant-time complexity that is inspired by the Linux Kernel's <math xmlns="http://www.w3.org/1998/Math/MathML">
+ <mrow><mi>O</mi><mo>&af;</mo><mo form='prefix' fence='true' stretchy='true' symmetric='true'>(</mo><mn>1</mn><mo form='postfix' fence='true' stretchy='true' symmetric='true'>)</mo>
+ </mrow></math> scheduler</div>
+</div>
+<div class="standard" style='text-align: center;'><a id='magicparlabel-840' />
+Copyright © 2012, MoMinis Ltd.</div>
+
+<div class="standard" style='text-align: center;'><a id='magicparlabel-841' />
+All rights reserved.</div>
+
+<div class="standard"><a id='magicparlabel-6' />
+</div>
+<div class='toc'><div class='tochead part'>Table of Contents</div>
+
+<div class='lyxtoc-1'><a href='#magicparlabel-7' class='tocentry'>1 Why Keep Things in Z-Order?</a> <a href='#magicparlabel-7' class='tocarrow'>&gt;</a>
+
+<div class='lyxtoc-2'><a href='#magicparlabel-11' class='tocentry'>1.1 The Touch Handler</a> <a href='#magicparlabel-11' class='tocarrow'>&gt;</a></div>
+
+<div class='lyxtoc-2'><a href='#magicparlabel-16' class='tocentry'>1.2 The Render Queue</a> <a href='#magicparlabel-16' class='tocarrow'>&gt;</a></div>
+</div>
+
+<div class='lyxtoc-1'><a href='#magicparlabel-20' class='tocentry'>2 The Challenge</a> <a href='#magicparlabel-20' class='tocarrow'>&gt;</a>
+
+<div class='lyxtoc-2'><a href='#magicparlabel-31' class='tocentry'>2.1 The Problem</a> <a href='#magicparlabel-31' class='tocarrow'>&gt;</a>
+
+<div class='lyxtoc-3'><a href='#magicparlabel-35' class='tocentry'>2.1.1 Runtime Complexity Analysis</a> <a href='#magicparlabel-35' class='tocarrow'>&gt;</a></div>
+</div>
+</div>
+
+<div class='lyxtoc-1'><a href='#magicparlabel-40' class='tocentry'>3 Initial Optimization Experiments</a> <a href='#magicparlabel-40' class='tocarrow'>&gt;</a></div>
+
+<div class='lyxtoc-1'><a href='#magicparlabel-50' class='tocentry'>4 <math xmlns="http://www.w3.org/1998/Math/MathML">
+ <mrow><mi>O</mi><mo>&af;</mo><mo form='prefix' fence='true' stretchy='true' symmetric='true'>(</mo><mn>1</mn><mo form='postfix' fence='true' stretchy='true' symmetric='true'>)</mo>
+ </mrow></math></a> <a href='#magicparlabel-50' class='tocarrow'>&gt;</a>
+
+<div class='lyxtoc-2'><a href='#magicparlabel-62' class='tocentry'>4.1 The Ideal Case</a> <a href='#magicparlabel-62' class='tocarrow'>&gt;</a>
+
+<div class='lyxtoc-3'><a href='#magicparlabel-113' class='tocentry'>4.1.1 Object Creation</a> <a href='#magicparlabel-113' class='tocarrow'>&gt;</a></div>
+
+<div class='lyxtoc-3'><a href='#magicparlabel-127' class='tocentry'>4.1.2 Destroying an Object</a> <a href='#magicparlabel-127' class='tocarrow'>&gt;</a></div>
+
+<div class='lyxtoc-3'><a href='#magicparlabel-140' class='tocentry'>4.1.3 Changing Z-order</a> <a href='#magicparlabel-140' class='tocarrow'>&gt;</a></div>
+
+<div class='lyxtoc-3'><a href='#magicparlabel-153' class='tocentry'>4.1.4 Traversing in Order</a> <a href='#magicparlabel-153' class='tocarrow'>&gt;</a></div>
+</div>
+
+<div class='lyxtoc-2'><a href='#magicparlabel-156' class='tocentry'>4.2 The Real World</a> <a href='#magicparlabel-156' class='tocarrow'>&gt;</a></div>
+
+<div class='lyxtoc-2'><a href='#magicparlabel-176' class='tocentry'>4.3 Conclusion</a> <a href='#magicparlabel-176' class='tocarrow'>&gt;</a></div>
+</div>
+</div>
+
+<h2 class="section"><span class="section_label">1</span> <a id='magicparlabel-7' />
+Why Keep Things in Z-Order?</h2>
+<div class="standard"><a id='magicparlabel-8' />
+It should come as no surprise that some of the tasks the MoMinis game engine is responsible for, beside driving the game's compiled logic, is to draw pretty things to the screen, and respond to touch input.</div>
+
+<div class="standard"><a id='magicparlabel-9' />
+For that, objects need to be arranged in a back-to-front order, to decide which object receives touch input, and which gets drawn first.</div>
+
+<div class="standard"><a id='magicparlabel-10' />
+We'll examine <em>why</em> we need it for these two things separately.</div>
+<h3 class="subsection"><span class="subsection_label">1.1</span> <a id='magicparlabel-11' />
+The Touch Handler</h3>
+<div class="standard"><a id='magicparlabel-12' />
+Our touch handler is a simple adapter between the platform and the game logic running on the engine. The adapter expects screen-level touch events from the OS, and dispatches game-level events - so when I click at a certain location on the screen, the object at that location receives a logical touch-down-event instead of just &ldquo;The user clicked at: <math xmlns="http://www.w3.org/1998/Math/MathML">
+ <mrow><mo form='prefix' fence='true' stretchy='true' symmetric='true'>(</mo>
+  <mrow><mi>x</mi><mo>,</mo><mi>y</mi>
+  </mrow><mo form='postfix' fence='true' stretchy='true' symmetric='true'>)</mo>
+ </mrow></math>&rdquo;.</div>
+
+<div class="standard"><a id='magicparlabel-13' />
+We provide this layer of abstraction to save game developers the need to handle low-level touch-events and decide which object should respond. It is very important that our development platform be kept suitable for entry-level developers, and be easy to use with as little hassle as possible.</div>
+
+<div class="standard"><a id='magicparlabel-14' />
+The case where game objects are stacked on one another and a touch event is received at a location that's within multiple objects can be difficult to handle at the game developer's level. That's why we decided that the touch event in this case is dispatched to the top-most object that's visible under the the finger, and that's it.</div>
+
+<div class="standard"><a id='magicparlabel-15' />
+The easiest way to do it is to scan all the objects in a front-to-back order and find the first that can handle the event.</div>
+<h3 class="subsection"><span class="subsection_label">1.2</span> <a id='magicparlabel-16' />
+The Render Queue</h3>
+<div class="standard"><a id='magicparlabel-17' />
+The MoMinis Game Engine is powered by OpenGL ES on both Android and iPhone. For compatibility reasons, we are limited to the OpenGL ES 1.1 API.</div>
+
+<div class="standard"><a id='magicparlabel-18' />
+At compile time, our compiler will generate the game's assets from the asset set provided by the game developer, and will arrange all drawn objects in a set of atlas textures as best as it can. Since hi-res games can have big assets and asset generation is done automatically, not by hand, we cannot avoid &ldquo;scene fragmentation&rdquo; - the situation where different parts of the same scene lies in different textures. </div>
+
+<div class="standard"><a id='magicparlabel-19' />
+As an internal optimization, just before submitting textures and geometry to OpenGL, we group objects by texture, to minimize texture swapping. However, due to the way the fixed render pipeline works in OpenGL ES 1.1, we must submit geometry in a back-to-front order when translucent textures are involved - otherwise, Z-culling and backbuffer blending interfere, and objects that should be partially visible behind a translucent object will not be, giving a strange feeling to the scene.</div>
+<h2 class="section"><span class="section_label">2</span> <a id='magicparlabel-20' />
+The Challenge</h2>
+<div class="standard"><a id='magicparlabel-21' />
+The demands from our cross-platform development environment and the games it produces are challenging:</div>
+
+<ul class="itemize"><li class="itemize_item"><a id='magicparlabel-22' />
+Inexperienced, non-programmer developers should be able to create nice games easily</li>
+<li class="itemize_item"><a id='magicparlabel-23' />
+Games should have good performance</li>
+<li class="itemize_item"><a id='magicparlabel-24' />
+Games should be pretty</li>
+<li class="itemize_item"><a id='magicparlabel-25' />
+Final game size should be small</li>
+<li class="itemize_item"><a id='magicparlabel-26' />
+Games should be portable</li>
+<li class="itemize_item"><a id='magicparlabel-27' />
+Developer should be bothered with porting issues as little as possible (preferably none at all)</li>
+</ul>
+<div class="standard"><a id='magicparlabel-28' />
+These demands conflict most of the time, and makes the game engine development a challenge.</div>
+
+<div class="standard"><a id='magicparlabel-29' />
+Game's logic can get quite complex pretty quickly when you're making a fully-fledged game. You have all these power ups and bonuses and special animations and sounds that change your basic game mechanics temporarily, and in some games you have to dynamically generate the level as the user advances (Ninja Chicken, Jelly Jump). As our platform developers aren't always seasoned programmers, or simply doesn't know the in-and-outs of the game engine's implementation, game logic is at times written in a sub-optimal fashion. In addition, common practices used by our game developers may worsen the situation, usually with no real alternative due to lack of certain features in the platform.</div>
+
+<div class="standard"><a id='magicparlabel-30' />
+This means that sometimes a game developer will create and destroy many auxiliary objects in a short time during game-play, making instance management a challenge. When we first encountered performance issues with object creation, we were able to identify the Z-order management section as a bottleneck.</div>
+<h3 class="subsection"><span class="subsection_label">2.1</span> <a id='magicparlabel-31' />
+The Problem</h3>
+<div class="standard"><a id='magicparlabel-32' />
+The entity that manages the game holds all existing objects in an array sorted by Z-order. Every time an object was being created, destroyed, or it's Z-order changed - it was removed from the array (moving all the elements after it one index back) and re-inserted at the correct location after a binary search (again, moving all the objects after it one place forward).</div>
+
+<div class="standard"><a id='magicparlabel-33' />
+Since scanning the array for the object is an <math xmlns="http://www.w3.org/1998/Math/MathML">
+ <mrow><mi>O</mi><mo>&af;</mo><mo form='prefix' fence='true' stretchy='true' symmetric='true'>(</mo><mi>n</mi><mo form='postfix' fence='true' stretchy='true' symmetric='true'>)</mo>
+ </mrow></math> operation, removing and inserting an element is again an <math xmlns="http://www.w3.org/1998/Math/MathML">
+ <mrow><mi>O</mi><mo>&af;</mo><mo form='prefix' fence='true' stretchy='true' symmetric='true'>(</mo><mi>n</mi><mo form='postfix' fence='true' stretchy='true' symmetric='true'>)</mo>
+ </mrow></math> operation, and finding the new spot is a <math xmlns="http://www.w3.org/1998/Math/MathML">
+ <mrow>
+  <mrow><mi>O</mi><mo form='prefix' fence='true' stretchy='true' symmetric='true'>(</mo><mi>log</mi><mo>&af;</mo><mi>n</mi><mo form='postfix' fence='true' stretchy='true' symmetric='true'>)</mo>
+  </mrow>
+ </mrow></math> operation - all the basic actions on an object were proportional to the number of objects existing at that moment.</div>
+
+<div class="standard"><a id='magicparlabel-34' />
+Needless to say, as games got more complex and required more objects, this became a problem.</div>
+<h4 class="subsubsection"><span class="subsubsection_label">2.1.1</span> <a id='magicparlabel-35' />
+Runtime Complexity Analysis</h4>
+
+<dl class='description'><dt class="description_label">create&nbsp;an&nbsp;object</dt>
+<dd class="description_item"><a id='magicparlabel-36' />
+ <math xmlns="http://www.w3.org/1998/Math/MathML">
+ <mrow>
+  <mrow><mi>O</mi><mo form='prefix' fence='true' stretchy='true' symmetric='true'>(</mo><mi>log</mi><mo>&af;</mo><mi>n</mi><mo form='postfix' fence='true' stretchy='true' symmetric='true'>)</mo>
+  </mrow>
+ </mrow></math> binary-search for the correct place, then inserting, possible shifting the entire array: <math xmlns="http://www.w3.org/1998/Math/MathML">
+ <mrow><mi>O</mi><mo>&af;</mo><mo form='prefix' fence='true' stretchy='true' symmetric='true'>(</mo><mi>n</mi><mo form='postfix' fence='true' stretchy='true' symmetric='true'>)</mo>
+ </mrow></math> </dd>
+<dt class="description_label">destroy&nbsp;an&nbsp;object</dt>
+<dd class="description_item"><a id='magicparlabel-37' />
+ Find the sprite in the array and remove it, possibly shifting the entire array: <math xmlns="http://www.w3.org/1998/Math/MathML">
+ <mrow><mi>O</mi><mo>&af;</mo><mo form='prefix' fence='true' stretchy='true' symmetric='true'>(</mo><mi>n</mi><mo form='postfix' fence='true' stretchy='true' symmetric='true'>)</mo>
+ </mrow></math></dd>
+<dt class="description_label">changing&nbsp;object's&nbsp;Z-order</dt>
+<dd class="description_item"><a id='magicparlabel-38' />
+ Remove, then add: <math xmlns="http://www.w3.org/1998/Math/MathML">
+ <mrow><mi>O</mi><mo>&af;</mo><mo form='prefix' fence='true' stretchy='true' symmetric='true'>(</mo><mi>n</mi><mo form='postfix' fence='true' stretchy='true' symmetric='true'>)</mo>
+ </mrow></math></dd>
+</dl>
+<div class="standard"><a id='magicparlabel-39' />
+Not so good.</div>
+<h2 class="section"><span class="section_label">3</span> <a id='magicparlabel-40' />
+Initial Optimization Experiments</h2>
+<div class="standard"><a id='magicparlabel-41' />
+We needed to fix it, and we needed to fix it fast. At the time, this problem was one of several that blocked the release of a ready-to-ship game.</div>
+
+<div class="standard"><a id='magicparlabel-42' />
+At first we took a conservative approach, trying to make as little changes as possible so close to a release. We concluded that there's no reason for the collection to be kept in order at all times - just when rendering and touch-handling. Our first attempt was to defer sorting the array to these two occasions.</div>
+
+<div class="standard"><a id='magicparlabel-43' />
+This should have addressed the object creation problem, reducing it from <math xmlns="http://www.w3.org/1998/Math/MathML">
+ <mrow><mi>O</mi><mo>&af;</mo><mo form='prefix' fence='true' stretchy='true' symmetric='true'>(</mo><mi>n</mi><mo form='postfix' fence='true' stretchy='true' symmetric='true'>)</mo>
+ </mrow></math> to <math xmlns="http://www.w3.org/1998/Math/MathML">
+ <mrow><mi>O</mi><mo>&af;</mo><mo form='prefix' fence='true' stretchy='true' symmetric='true'>(</mo><mn>1</mn><mo form='postfix' fence='true' stretchy='true' symmetric='true'>)</mo>
+ </mrow></math>, as we intended to simply append the new object to the end of the list. This would also cut down by half Z-order changes, as we were no longer adding the object to the collection as we used to.</div>
+
+<div class="standard"><a id='magicparlabel-44' />
+At first we tried good-ol'-quicksort for the just-in-time sort. Unfortunately, the game engine's contract with the developer is that objects at the same Z-order are sub-ordered by the order their Z-value changed - meaning our sorting algorithm should be stable, and quicksort isn't. (It took us a good while to figure that <em>that</em> was what was causing the weird phenomenons we were seeing with the game's graphics)</div>
+
+<div class="standard"><a id='magicparlabel-45' />
+Somewhat humbled by our reckless arrogance, thinking this was such an easy problem to fix, we looked for a good sorting algorithm that is both stable and efficient. Tree-sort was the next thing we tried. Though the sort was now stable, it was also very slow. We failed at identifying that we were using Tree-sort and a mostly-sorted collection, which is Tree-sort's Achilles Heel - in that case you end up with a degenerate tree and efficiency is no more.</div>
+
+<div class="standard"><a id='magicparlabel-46' />
+Reading a little bit on the web we encountered all sorts of sorting algorithms and variations on existing algorithms that could or could not do, but we didn't have the time to start learning and understanding each one and decide if it was appropriate for our needs.</div>
+
+<div class="standard"><a id='magicparlabel-47' />
+Back to quicksort then. This time we applied a bias to the Z-order, giving a monotonic index for each object that got it's Z-order changed. This wasn't perfect, but it was reasonable for the time we had.</div>
+
+<div class="standard"><a id='magicparlabel-48' />
+Eventually, this optimization didn't make it to the release - we were able to improve various parts of the game enough to make it releasable, by avoiding creation of multiple objects in a single logical iteration, thus not triggering the Z-order problem in the first place.</div>
+
+<div class="standard"><a id='magicparlabel-49' />
+Now we had some time to find our silver-bullet.</div>
+<h2 class="section"><span class="section_label">4</span> <a id='magicparlabel-50' />
+<math xmlns="http://www.w3.org/1998/Math/MathML">
+ <mrow><mi>O</mi><mo>&af;</mo><mo form='prefix' fence='true' stretchy='true' symmetric='true'>(</mo><mn>1</mn><mo form='postfix' fence='true' stretchy='true' symmetric='true'>)</mo>
+ </mrow></math></h2>
+<div class="standard"><a id='magicparlabel-51' />
+Back when I was running Red Hat Linux 8 with kernel 2.4.18 (or something), I remember reading that the under-development Linux 2.6 had an all-new <math xmlns="http://www.w3.org/1998/Math/MathML">
+ <mrow><mi>O</mi><mo>&af;</mo><mo form='prefix' fence='true' stretchy='true' symmetric='true'>(</mo><mn>1</mn><mo form='postfix' fence='true' stretchy='true' symmetric='true'>)</mo>
+ </mrow></math> scheduler<div class="foot"><span class="foot_label">1</span><div class="foot_inner"><div class="plain_layout"><a id='magicparlabel-55' />
+<span class="flex_url">http://www.ibm.com/developerworks/linux/library/l-scheduler/</span></div>
+</div></div>. The news about this scheduler were that it could schedule many tasks in a constant time, no matter how loaded was the system. This scheduler held up till 2.6.23, when it was replaced by the <math xmlns="http://www.w3.org/1998/Math/MathML">
+ <mrow><mi>log</mi><mo>&af;</mo><mi>n</mi>
+ </mrow></math> Completely Fair Scheduler. </div>
+
+<div class="standard"><a id='magicparlabel-60' />
+What made this an <math xmlns="http://www.w3.org/1998/Math/MathML">
+ <mrow><mi>O</mi><mo>&af;</mo><mo form='prefix' fence='true' stretchy='true' symmetric='true'>(</mo><mn>1</mn><mo form='postfix' fence='true' stretchy='true' symmetric='true'>)</mo>
+ </mrow></math> scheduler was that the author, Ingo Molnar, decided not to store priority information in the tasks themselves and sort them in a collection according to these priorities. Instead, he chose to store the task's priority information in the collection it was contained in - he created a different queue for each priority level, allowing him direct access to the head of each queue. Since the number of priority levels was predetermined, scanning all priority queues is done in constant time.</div>
+
+<div class="standard"><a id='magicparlabel-61' />
+Since tasks behave almost erratically, much like objects in our games, but still must be kept in order for scheduling, we tried a new approach, based on the Linux solution.</div>
+<h3 class="subsection"><span class="subsection_label">4.1</span> <a id='magicparlabel-62' />
+The Ideal Case</h3>
+<div class="standard"><a id='magicparlabel-63' />
+We'll first describe our solution in the ideal case, where we are free to set the external constraints. Lets begin by defining an object's Z-order to be a natural, bounded number (say, between 0 and 100), where lower Z-order means an object is at the back.</div>
+
+<div class="standard"><a id='magicparlabel-64' />
+The idea is to have a &ldquo;bucket&rdquo; for every legal Z-order, holding all objects that have that Z-order by order of insertion. We'll implement a &ldquo;bucket&rdquo; with a double-ended linked-list, which allows us an <math xmlns="http://www.w3.org/1998/Math/MathML">
+ <mrow><mi>O</mi><mo>&af;</mo><mo form='prefix' fence='true' stretchy='true' symmetric='true'>(</mo><mn>1</mn><mo form='postfix' fence='true' stretchy='true' symmetric='true'>)</mo>
+ </mrow></math> insertion of a new object to its end. Traversing the entire structure is trivial - all we have to do is scan the objects in the first bucket, and move to the next until there are no more buckets.</div>
+
+<div class="standard"><a id='magicparlabel-65' />
+However, we still have to confront the removal of objects from a bucket (either when it is being destroyed, or moved to another bucket as its Z-order changes). To avoid having to scan the entire collection to find the location of the object's link in the bucket's list, we'll use an auxiliary field in the object itself - we're going to cache the current linked-list link holding the object in the bucket <em>inside the sprite</em>, allowing us <math xmlns="http://www.w3.org/1998/Math/MathML">
+ <mrow><mi>O</mi><mo>&af;</mo><mo form='prefix' fence='true' stretchy='true' symmetric='true'>(</mo><mn>1</mn><mo form='postfix' fence='true' stretchy='true' symmetric='true'>)</mo>
+ </mrow></math> access to it.</div>
+
+<div class="standard"><a id='magicparlabel-66' />
+We're creating a back-reference from an object to its location in the bucket it is currently in.</div>
+
+<div class="standard"><a id='magicparlabel-67' />
+From here things look trivial. Since selecting a bucket is matter of array lookup by index, adding to the end of a linked list is <math xmlns="http://www.w3.org/1998/Math/MathML">
+ <mrow><mi>O</mi><mo>&af;</mo><mo form='prefix' fence='true' stretchy='true' symmetric='true'>(</mo><mn>1</mn><mo form='postfix' fence='true' stretchy='true' symmetric='true'>)</mo>
+ </mrow></math> and removing a link from the linked-list is also <math xmlns="http://www.w3.org/1998/Math/MathML">
+ <mrow><mi>O</mi><mo>&af;</mo><mo form='prefix' fence='true' stretchy='true' symmetric='true'>(</mo><mn>1</mn><mo form='postfix' fence='true' stretchy='true' symmetric='true'>)</mo>
+ </mrow></math> (given the link object itself), we can achieve an always-sorted collection with <math xmlns="http://www.w3.org/1998/Math/MathML">
+ <mrow><mi>O</mi><mo>&af;</mo><mo form='prefix' fence='true' stretchy='true' symmetric='true'>(</mo><mn>1</mn><mo form='postfix' fence='true' stretchy='true' symmetric='true'>)</mo>
+ </mrow></math> runtime for all the actions we need.</div>
+
+<div class="standard"><a id='magicparlabel-68' />
+Let's examine how it's implemented<div class="foot"><span class="foot_label">2</span><div class="foot_inner"><div class="plain_layout"><a id='magicparlabel-72' />
+I've included only interface listings for things that are trivial to implement. For full code listing, checkout: <span class="flex_url">http://some-open-source-site-maybe</span> and the SimpleZCollection class</div>
+</div></div>. First, A game object will have to be able to report its Z-order, and hold the auxiliary link:</div>
+
+<div class="standard"><a id='magicparlabel-77' />
+</div>
+<div class='float float-listings'><pre>interface ZSortable {
+	public int getZOrder();
+	public Unlinkable getCurrentLink();
+	public void setCurrentLink(Unlinkable currentLink);
+}</pre></div>
+
+
+<div class="standard"><a id='magicparlabel-86' />
+For the sake of abstraction, we're not holding the actual linked-list link in the object, but we hold it through an interface that allows us to remove the link from the list:</div>
+
+<div class="standard"><a id='magicparlabel-87' />
+</div>
+<div class='float float-listings'><pre>interface Unlinkable {
+	public void unlink();
+}</pre></div>
+
+
+<div class="standard"><a id='magicparlabel-94' />
+Next step is to implement the list that will hold a bucket's contents. Remember that it has to expose the link that holds an object so we could cache it:</div>
+
+<div class="standard"><a id='magicparlabel-95' />
+</div>
+<div class='float float-listings'><pre>interface ZLinkedList extends Iterable&lt;ZSortable&gt; {
+	public Unlinkable append(ZSortable object);
+	public Iterator&lt;ZSortable&gt; iterator();
+}</pre></div>
+
+
+<div class="standard"><a id='magicparlabel-103' />
+Now all we have to do is to create a bucket for each legal Z-order:</div>
+
+<div class="standard"><a id='magicparlabel-104' />
+</div>
+<div class='float float-listings'><pre>ZLinkedList[] buckets = new ZLinkedList[MAX_Z_LEVEL + 1];
+for (int i = 0; i &lt;= MAX_Z_LEVEL ; ++i) {
+	buckets[i] = new ZLinkedListImpl();
+}</pre></div>
+
+
+<div class="standard"><a id='magicparlabel-112' />
+And by that we've written our basic data structure. Lets examine each action separately, and see how we make it an <math xmlns="http://www.w3.org/1998/Math/MathML">
+ <mrow><mi>O</mi><mo>&af;</mo><mo form='prefix' fence='true' stretchy='true' symmetric='true'>(</mo><mn>1</mn><mo form='postfix' fence='true' stretchy='true' symmetric='true'>)</mo>
+ </mrow></math> operation.</div>
+<h4 class="subsubsection"><span class="subsubsection_label">4.1.1</span> <a id='magicparlabel-113' />
+Object Creation</h4>
+<div class="standard"><a id='magicparlabel-114' />
+To add a new object to the collection, all we have to do is to append it to the end of the bucket of its initial Z-order, and cache the link in the object. That will also ensure sub-order of same-Z objects:</div>
+
+<div class="standard"><a id='magicparlabel-115' />
+</div>
+<div class='float float-listings'><pre>void add(ZSortable object) {
+	// ... check that 'object' isn't null ...
+	int zOrder = object.getZOrder();
+	// ... assert that: zOrder &gt;= 0 and zOrder &lt;= MAX_Z_LEVEL
+	Unlinkable link = buckets[zOrder].add(object);
+	object.setCurrentLink(link);
+}</pre></div>
+
+
+<div class="standard"><a id='magicparlabel-126' />
+Since this is a double-ended linked-list, appending to its end is an <math xmlns="http://www.w3.org/1998/Math/MathML">
+ <mrow><mi>O</mi><mo>&af;</mo><mo form='prefix' fence='true' stretchy='true' symmetric='true'>(</mo><mn>1</mn><mo form='postfix' fence='true' stretchy='true' symmetric='true'>)</mo>
+ </mrow></math> action.</div>
+<h4 class="subsubsection"><span class="subsubsection_label">4.1.2</span> <a id='magicparlabel-127' />
+Destroying an Object</h4>
+<div class="standard"><a id='magicparlabel-128' />
+To remove an object from the Z-collection, all we have to do is unlink it from the bucket's list:</div>
+
+<div class="standard"><a id='magicparlabel-129' />
+</div>
+<div class='float float-listings'><pre>void remove(ZSortable object) {
+	// ... check that 'object' isn't null ...
+	// ... check that 'object' has a valid link ...
+	object.getCurrentLink().unlink();
+	object.setCurrentLink(null);
+}</pre></div>
+
+
+<div class="standard"><a id='magicparlabel-139' />
+Since unlinking a link from a double-linked-list is an <math xmlns="http://www.w3.org/1998/Math/MathML">
+ <mrow><mi>O</mi><mo>&af;</mo><mo form='prefix' fence='true' stretchy='true' symmetric='true'>(</mo><mn>1</mn><mo form='postfix' fence='true' stretchy='true' symmetric='true'>)</mo>
+ </mrow></math> operation, and we have a direct access to the link, this is also the runtime complexity for removing an object from the collection.</div>
+<h4 class="subsubsection"><span class="subsubsection_label">4.1.3</span> <a id='magicparlabel-140' />
+Changing Z-order</h4>
+<div class="standard"><a id='magicparlabel-141' />
+Changing the Z-order of an object is as simple as removing it from the previous bucket, and adding it to the new one, just like before:</div>
+
+<div class="standard"><a id='magicparlabel-142' />
+</div>
+<div class='float float-listings'><pre>void change(ZSortable object) {
+	// ... check that 'object' isn't null ...
+	// ... check that 'object' has a valid link ...
+	remove(object);
+	add(object);
+}</pre></div>
+
+
+<div class="standard"><a id='magicparlabel-152' />
+Note that we're not skipping the operation even if the object was being &ldquo;changed&rdquo; to the same Z as its current - this is on purpose as we have to pop the object up to be above all the rest according to the engine's contract with the developer. Since we're only using <math xmlns="http://www.w3.org/1998/Math/MathML">
+ <mrow><mi>O</mi><mo>&af;</mo><mo form='prefix' fence='true' stretchy='true' symmetric='true'>(</mo><mn>1</mn><mo form='postfix' fence='true' stretchy='true' symmetric='true'>)</mo>
+ </mrow></math> operations, this is also an <math xmlns="http://www.w3.org/1998/Math/MathML">
+ <mrow><mi>O</mi><mo>&af;</mo><mo form='prefix' fence='true' stretchy='true' symmetric='true'>(</mo><mn>1</mn><mo form='postfix' fence='true' stretchy='true' symmetric='true'>)</mo>
+ </mrow></math> operation.</div>
+<h4 class="subsubsection"><span class="subsubsection_label">4.1.4</span> <a id='magicparlabel-153' />
+Traversing in Order</h4>
+<div class="standard"><a id='magicparlabel-154' />
+Traversing in order (either back-to-front or front-to-back) is trivial - we traverse all the buckets in the desired order, and for each bucket we traverse its list in the desired order (for back-to-front we'll iterate normally, and for front-to-back we'll iterate in reverse on both buckets and bucket-lists)</div>
+
+<div class="standard"><a id='magicparlabel-155' />
+Since advancing in a linked-list is an <math xmlns="http://www.w3.org/1998/Math/MathML">
+ <mrow><mi>O</mi><mo>&af;</mo><mo form='prefix' fence='true' stretchy='true' symmetric='true'>(</mo><mn>1</mn><mo form='postfix' fence='true' stretchy='true' symmetric='true'>)</mo>
+ </mrow></math> operation, traversing the entire collection is <math xmlns="http://www.w3.org/1998/Math/MathML">
+ <mrow><mi>O</mi><mo>&af;</mo><mo form='prefix' fence='true' stretchy='true' symmetric='true'>(</mo><mi>n</mi><mo form='postfix' fence='true' stretchy='true' symmetric='true'>)</mo>
+ </mrow></math>.</div>
+<h3 class="subsection"><span class="subsection_label">4.2</span> <a id='magicparlabel-156' />
+The Real World</h3>
+<div class="standard"><a id='magicparlabel-157' />
+Though the previous solution will work well in new designs, we couldn't use it as it was in our engine. The reason being, as always, backward compatibility.</div>
+
+<div class="standard"><a id='magicparlabel-158' />
+The engine works in fixed-point arithmetic, and supports &ldquo;non-integer&rdquo; and negative Z-orders. In addition, the range of possible Z-orders spans the entire integer space - way too many for an array (there's more than four billion possible values). Moreover, <em>every</em> object created gets the default maximal Z-order <em>possible</em> (<math xmlns="http://www.w3.org/1998/Math/MathML">
+ <mrow>
+  <mrow>
+   <msup>
+    <mrow><mn>2</mn>
+    </mrow>
+    <mrow><mn>31</mn>
+    </mrow>
+   </msup><mo>-</mo><mn>1</mn>
+  </mrow>
+ </mrow></math>), which is more than two billion.</div>
+
+<div class="standard"><a id='magicparlabel-159' />
+To preserve backward compatibility with old games, but still enjoy the benefits of the new Z-management collection, we've taken a best-effort approach. We allow negative an non-integer Z-levels, as well as very high or low values - but these aren't as optimal as natural bounded Z-orders. We also provide a special-case optimization for the default Z-order.</div>
+
+<div class="standard"><a id='magicparlabel-160' />
+First thing we did was to replace the buckets array with a linked-list. This will allow us to open new buckets for non-integer Z-levels in between &ldquo;optimized&rdquo; buckets, or add new large/small buckets on-demand.</div>
+
+<div class="standard"><a id='magicparlabel-161' />
+We also allocate at the end of the list the last level, for the maximal default entry. Every item in the buckets list holds a list of sortables, and the Z-order it represents.</div>
+
+<div class="standard"><a id='magicparlabel-162' />
+Initially, the buckets list is initialized with a bucket for each optimized integer Z-order, plus the maximal level. Then, the links of the buckets list holding the buckets themselves are put in an array (we call it the &ldquo;quick-access&rdquo; array). As before, we cache the internal structure the linked-list uses.</div>
+
+<div class="standard"><a id='magicparlabel-163' />
+This ensures we can always access optimized Z-orders buckets quickly, even when new Z-order buckets are inserted in-between.</div>
+
+<div class="standard"><a id='magicparlabel-164' />
+When we need to add a new object, we first check if it's Z-order is the default order. If so, it is appended to that bucket, which we hold direct reference to. Otherwise, we'll test whether it's an optimized Z-order. If it is, we can simple append it to the proper bucket after looking it up in the quick-access array.</div>
+
+<div class="standard"><a id='magicparlabel-165' />
+If this is an unoptimized Z-order, we'll fall back to an <math xmlns="http://www.w3.org/1998/Math/MathML">
+ <mrow><mi>O</mi><mo>&af;</mo><mo form='prefix' fence='true' stretchy='true' symmetric='true'>(</mo><mi>n</mi><mo form='postfix' fence='true' stretchy='true' symmetric='true'>)</mo>
+ </mrow></math> search method that will look for an existing bucket with the new Z-order. We simply traverse all the buckets in order, starting from the nearest optimized one, and try to find a bucket with that Z-order. If we can't find one, we'll insert a new bucket between links in the appropriate location in the buckets list.</div>
+
+<div class="standard"><a id='magicparlabel-166' />
+Support for negative Z-order is similar.</div>
+
+<div class="standard"><a id='magicparlabel-167' />
+This allows us to support old games, but give new games that follow the guidelines better performance<div class="foot"><span class="foot_label">3</span><div class="foot_inner"><div class="plain_layout"><a id='magicparlabel-171' />
+You can find the complete implementation of this collection at: <span class="flex_url">http://some-open-source-site-maybe</span> in the FixedPointZCollection class</div>
+</div></div>.</div>
+<h3 class="subsection"><span class="subsection_label">4.3</span> <a id='magicparlabel-176' />
+Conclusion</h3>
+<div class="standard"><a id='magicparlabel-177' />
+...</div>
+
+<div class="standard"><a id='magicparlabel-178' />
+</div>
+</body>
+</html>

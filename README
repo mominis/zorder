@@ -1,0 +1,21 @@
+This project contains a reference implementation of the Z-sorted collection
+described in the article under docs/
+
+The article details an always-sorted collection providing O(1):
+* Addition of new elements
+* Removal of existing elements; and
+* Change of Z-order
+
+In addition, the collection gives O(n) traversal in-order of the collection.    
+
+The main classes are: SimpleZCollection and FixedPointZCollection under the
+com.mominis.zorder package.
+
+This code is distributed under the LGPLv3 license, see LICENSE for additional
+information.
+
+MoMinis develops a cross-platform, easy-to-use development environment for
+mobile games. For additional information checkout: http://www.mominis.com
+
+For questions, suggestions and bug reports, you are welcome to write to:
+opensource@mominis.com
