@@ -179,15 +179,14 @@ import java.util.Iterator;
 			if (prev == null) {
 				// head
 				head = next;
+			} else {
+				prev.next = next;
 			}
 			
 			if (next == null) {
 				// tail
 				tail = prev;
-			}
-			
-			if (next != null && prev != null) {
-				prev.next = next;
+			} else {
 				next.prev = prev;
 			}
 		}

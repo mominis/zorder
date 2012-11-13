@@ -169,4 +169,39 @@ public class SimpleZCollectionTests {
 		assertSame(object1, iter.next());
 		assertFalse(iter.hasNext());
 	}
+	
+	@Test
+	public void makeSureUnlinkRemoves() throws Exception {
+		SimpleObject object1 = new SimpleObject("object1");
+		SimpleObject object2 = new SimpleObject("object2");
+		
+		// choose two different z levels
+		int z1 = Math.abs(rand.nextInt()) % (MAX_Z + 1);
+		int z2 = Math.abs(rand.nextInt()) % (MAX_Z + 1);
+		while (z2 == z1) {
+			z2 = Math.abs(rand.nextInt()) % (MAX_Z + 1);
+		}
+		
+		object1.setZOrder(z1);
+		underTest.add(object1);
+		
+		object2.setZOrder(z1);
+		underTest.add(object2);
+		
+		Iterator<ZSortable> iter = underTest.backToFrontIterator();
+		assertNotNull(iter);
+		assertTrue(iter.hasNext());
+		assertSame(object1, iter.next());
+		assertTrue(iter.hasNext());
+		assertSame(object2, iter.next());
+		assertFalse(iter.hasNext());
+		
+		underTest.remove(object2);
+		
+		iter = underTest.backToFrontIterator();
+		assertNotNull(iter);
+		assertTrue(iter.hasNext());
+		assertSame(object1, iter.next());
+		assertFalse(iter.hasNext());
+	}
 }
